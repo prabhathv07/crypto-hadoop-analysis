@@ -81,7 +81,7 @@ Historical OHLCV tick data for 100+ cryptocurrency trading pairs spanning **Apri
 
 ### Volatility — Top 10 Most Volatile Cryptocurrencies
 
-Average intraday High − Low price spread:
+Average intraday High − Low price spread (absolute, not percentage-normalized — lower-priced assets like PEPE/SHIB naturally rank lower despite high relative volatility):
 
 | Rank | Symbol | Avg Volatility |
 |------|--------|----------------|

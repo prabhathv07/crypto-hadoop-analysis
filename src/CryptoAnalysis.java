@@ -28,7 +28,7 @@ public class CryptoAnalysis {
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String[] tokens = value.toString().split(",");
-            if (tokens.length >= 8) { // Ensure there are enough columns
+            if (tokens.length >= 9) { // need indices 0–8; >= 8 would allow only 0–7
                 try {
                     double high = Double.parseDouble(tokens[1]);
                     double low = Double.parseDouble(tokens[2]);
@@ -94,9 +94,10 @@ public class CryptoAnalysis {
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String[] tokens = value.toString().split(",");
-            if (tokens.length >= 8) { // Ensure there are enough columns
+            if (tokens.length >= 9) { // need indices 0–8; >= 8 would allow only 0–7
                 try {
                     double open = Double.parseDouble(tokens[0]);
+                    if (open == 0) return; // guard against Infinity/NaN corrupting results
                     double close = Double.parseDouble(tokens[3]);
                     symbol.set(tokens[8]); // Set symbol from the last column (index 8)
                     performance.set((close - open) / open * 100); // Percentage change
