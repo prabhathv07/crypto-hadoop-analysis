@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Java compiled output
+*.class
+out/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# Hadoop logs
+logs/
+*.log
+
+# HDFS local staging
+tmp/
