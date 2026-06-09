@@ -51,7 +51,7 @@ Each analysis job shares the same entry point (`CryptoAnalysis`) but routes to a
 
 | Layer | Technology |
 |-------|-----------|
-| Processing framework | Apache Hadoop 2.6.5 (MapReduce) |
+| Processing framework | Apache Hadoop 2.6.5 (MapReduce) — version available on the AWS cluster used for this analysis; current Hadoop is 3.3.x |
 | Language | Java 8 |
 | Distributed storage | HDFS |
 | Infrastructure | AWS EC2 (namenode + datanodes) |
@@ -96,7 +96,9 @@ Average intraday High − Low price spread:
 | 9 | SHIB | 3.39 × 10⁻⁸ |
 | 10 | PEPE | 2.86 × 10⁻⁸ |
 
-### Performance — Bottom 10 Avg Open→Close % Change
+### Performance — Bottom 10 Worst Performers (Avg Open→Close % Change)
+
+The `performance` job intentionally surfaces the **worst** performers — symbols with the most negative average open-to-close return over the analysis window. The reducer uses a max-heap so `poll()` evicts the least-negative entry on each step, leaving only the 10 most negative values.
 
 | Rank | Symbol | Avg % Change |
 |------|--------|--------------|
@@ -217,7 +219,6 @@ crypto-hadoop-analysis/
 │   ├── result_volatility.txt
 │   ├── result_performance.txt
 │   └── result_top10high.txt
-├── ca.jar                         # Pre-built executable JAR
 └── README.md
 ```
 

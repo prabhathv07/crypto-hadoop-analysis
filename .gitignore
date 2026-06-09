@@ -5,6 +5,7 @@
 
 # Java compiled output
 *.class
+*.jar
 out/
 
 # IDE

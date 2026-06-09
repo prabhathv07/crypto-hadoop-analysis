@@ -49,8 +49,8 @@ public class CryptoAnalysis {
 
     @Override
     protected void setup(Context context) {
-        // PriorityQueue to hold top 10 cryptocurrencies sorted by volatility (descending order)
-        topVolatility = new PriorityQueue<>(10, (a, b) -> Double.compare(b.getValue(), a.getValue()));
+        // Min-heap: poll() evicts the smallest, so only the 10 largest volatilities survive
+        topVolatility = new PriorityQueue<>(10, (a, b) -> Double.compare(a.getValue(), b.getValue()));
     }
 
     @Override
@@ -67,9 +67,8 @@ public class CryptoAnalysis {
         // Add the symbol and its volatility to the priority queue
         topVolatility.add(new SymbolValuePair(key.toString(), avgVolatility));
 
-        // Ensure the PriorityQueue holds only the top 10 volatility values
         if (topVolatility.size() > 10) {
-            topVolatility.poll(); // Remove the smallest volatility entry
+            topVolatility.poll(); // evict the current minimum, keeping the 10 largest
         }
     }
 
@@ -108,15 +107,15 @@ public class CryptoAnalysis {
             }
         }
     }
-// Performance Reducer
+// Performance Reducer — surfaces the 10 worst-performing symbols (most negative avg % change)
 public static class PerformanceReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
     private DoubleWritable result = new DoubleWritable();
-    private PriorityQueue<SymbolValuePair> topPerformance;
+    private PriorityQueue<SymbolValuePair> worstPerformers;
 
     @Override
     protected void setup(Context context) {
-        // PriorityQueue to hold top 10 cryptocurrencies sorted by performance (descending order)
-        topPerformance = new PriorityQueue<>(10, (a, b) -> Double.compare(b.getValue(), a.getValue()));
+        // Max-heap: poll() evicts the largest (least negative), keeping the 10 most negative values
+        worstPerformers = new PriorityQueue<>(10, (a, b) -> Double.compare(b.getValue(), a.getValue()));
     }
 
     @Override
@@ -128,22 +127,19 @@ public static class PerformanceReducer extends Reducer<Text, DoubleWritable, Tex
             totalPerformance += val.get();
             count++;
         }
-        double avgPerformance = totalPerformance / count; // average performance
+        double avgPerformance = totalPerformance / count;
 
-        // Add the symbol and its performance to the priority queue
-        topPerformance.add(new SymbolValuePair(key.toString(), avgPerformance));
+        worstPerformers.add(new SymbolValuePair(key.toString(), avgPerformance));
 
-        // Ensure the PriorityQueue holds only the top 10 performance values
-        if (topPerformance.size() > 10) {
-            topPerformance.poll(); // Remove the smallest performance entry
+        if (worstPerformers.size() > 10) {
+            worstPerformers.poll(); // evict the least-negative entry, keeping the 10 worst
         }
     }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        // Convert the priority queue to a sorted list and emit top 10 symbols with the highest performance
-        List<SymbolValuePair> sortedList = new ArrayList<>(topPerformance);
-        sortedList.sort((a, b) -> Double.compare(b.getValue(), a.getValue())); // Sort descending order
+        List<SymbolValuePair> sortedList = new ArrayList<>(worstPerformers);
+        sortedList.sort((a, b) -> Double.compare(b.getValue(), a.getValue())); // least negative → most negative
 
         for (SymbolValuePair pair : sortedList) {
             result.set(pair.getValue());
@@ -184,7 +180,7 @@ public static class SymbolValuePair {
                 try {
                     String timestamp = tokens[6]; // Timestamp (assume index 6)
                     String cryptoSymbol = tokens[8]; // Symbol (assume index 8)
-                    double volume = Double.parseDouble(tokens[4]); // Volume (assume index 6)
+                    double volume = Double.parseDouble(tokens[4]); // Volume (index 4)
 
                     // Emit symbol as key and volume + timestamp as value
                     symbol.set(cryptoSymbol);
