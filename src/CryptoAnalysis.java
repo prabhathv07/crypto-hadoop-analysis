@@ -290,6 +290,10 @@ public static class SymbolValuePair {
             fs.delete(outputPath, true);
         }
 
+        // Global Top-K requires all symbols to flow through a single reducer;
+        // without this, each reducer computes a local top-10 with no global merge.
+        job.setNumReduceTasks(1);
+
         String task = args[2];
         if ("volatility".equalsIgnoreCase(task)) {
             job.setMapperClass(VolatilityMapper.class);
